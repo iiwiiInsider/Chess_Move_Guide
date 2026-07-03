@@ -1,0 +1,29 @@
+{
+  "name": "chess_move_guide",
+  "version": "1.0.0",
+  "description": "Chess session tracker with screenshot upload and best-move guidance",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iiwiiInsider/Chess_Move_Guide.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/iiwiiInsider/Chess_Move_Guide/issues"
+  },
+  "homepage": "https://github.com/iiwiiInsider/Chess_Move_Guide#readme",
+  "dependencies": {
+    "chess.js": "^1.4.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
+    "uuid": "^14.0.1"
+  }
+}
