@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chess Move Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <main class="main-menu view active" id="mainMenuView">
+      <section class="panel menu-panel">
+        <h1>Chess Move Guide</h1>
+        <p class="subtitle">Choose what you want to do.</p>
+        <div class="menu-grid">
+          <button id="goStartGame" class="menu-card">
+            <span class="menu-card-title">Start New Game</span>
+            <span class="menu-card-copy">Create a session, upload board screenshot, and get the best move.</span>
+          </button>
+          <button id="goManageGames" class="menu-card">
+            <span class="menu-card-title">Manage Games</span>
+            <span class="menu-card-copy">See all saved sessions and reopen one instantly.</span>
+          </button>
+          <button id="goTips" class="menu-card">
+            <span class="menu-card-title">Tips & Tricks</span>
+            <span class="menu-card-copy">Quick strategy reminders to improve decision-making.</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <main class="app-shell view" id="gameplayView">
+      <section class="panel panel-session">
+        <div class="section-top">
+          <button id="backFromGame" class="btn small ghost">Main Menu</button>
+        </div>
+        <h1>Start New Game</h1>
+        <p class="subtitle">Create a session, pick your side, upload the board screenshot, and map the current position.</p>
+
+        <div class="field">
+          <label for="sessionName">Session Name</label>
+          <input id="sessionName" type="text" placeholder="Ranked Blitz vs Alex" maxlength="60" />
+        </div>
+
+        <div class="field">
+          <label for="sideSelect">Your Side</label>
+          <select id="sideSelect">
+            <option value="white">White</option>
+            <option value="black">Black</option>
+          </select>
+        </div>
+
+        <button id="createSessionBtn" class="btn">Create Session</button>
+
+        <div class="session-status" id="sessionStatus">No active session.</div>
+
+        <hr />
+
+        <div class="field">
+          <label for="screenshotInput">Upload Board Screenshot</label>
+          <input id="screenshotInput" type="file" accept="image/*" />
+        </div>
+
+        <div class="screenshot-wrap">
+          <img id="screenshotPreview" alt="Screenshot preview" />
+        </div>
+
+        <div class="status-line" id="uploadStatus"></div>
+      </section>
+
+      <section class="panel panel-board">
+        <div class="board-header">
+          <h2>Board Mapper</h2>
+          <div class="controls">
+            <button id="startPositionBtn" class="btn small">Start Position</button>
+            <button id="clearBoardBtn" class="btn small ghost">Clear</button>
+          </div>
+        </div>
+
+        <div class="palette" id="piecePalette"></div>
+
+        <div class="board-wrap">
+          <div id="board" class="board"></div>
+        </div>
+
+        <div class="fen-box">
+          <label for="fenOutput">Generated FEN</label>
+          <textarea id="fenOutput" rows="2" readonly></textarea>
+        </div>
+
+        <button id="analyzeBtn" class="btn accent">Suggest Best Move</button>
+        <div class="result" id="resultBox">Recommendation will appear here.</div>
+      </section>
+    </main>
+
+    <main class="manage-shell view" id="manageView">
+      <section class="panel">
+        <div class="section-top">
+          <button id="backFromManage" class="btn small ghost">Main Menu</button>
+          <button id="refreshGamesBtn" class="btn small">Refresh</button>
+        </div>
+        <h1>Manage Games</h1>
+        <p class="subtitle">Select a saved game and continue from where you left off.</p>
+        <div id="gamesList" class="games-list"></div>
+      </section>
+    </main>
+
+    <main class="tips-shell view" id="tipsView">
+      <section class="panel">
+        <div class="section-top">
+          <button id="backFromTips" class="btn small ghost">Main Menu</button>
+        </div>
+        <h1>Tips & Tricks</h1>
+        <p class="subtitle">Strong fundamentals that help in most positions.</p>
+        <div class="tips-list">
+          <article class="tip-item"><h3>1. Develop With Purpose</h3><p>Move each piece to active squares and avoid moving the same piece repeatedly in the opening.</p></article>
+          <article class="tip-item"><h3>2. King Safety First</h3><p>Castle early and keep pawns around your king intact unless there is a concrete tactical reason.</p></article>
+          <article class="tip-item"><h3>3. Improve Worst Piece</h3><p>Before searching tactics, identify your least active piece and find a better square for it.</p></article>
+          <article class="tip-item"><h3>4. Calculate Forcing Moves</h3><p>Check checks, captures, and threats first. This trims the candidate move list quickly.</p></article>
+          <article class="tip-item"><h3>5. Convert Advantages Safely</h3><p>When ahead, trade pieces not pawns, reduce counterplay, and avoid unnecessary complications.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chess.js@1.4.0/dist/chess.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
