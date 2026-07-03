@@ -24,10 +24,8 @@ const pieceNames = {
 };
 
 const paletteOrder = ["", "K", "Q", "R", "B", "N", "P", "k", "q", "r", "b", "n", "p"];
-const localStorageKey = "cmg_sessions_v1";
 
 const state = {
-  mode: "api",
   sessionId: null,
   sessionName: "",
   side: "w",
@@ -230,52 +228,8 @@ function renderBoard() {
   fenOutput.value = getFen();
 }
 
-function readLocalSessions() {
-  try {
-    const raw = localStorage.getItem(localStorageKey);
-    if (!raw) {
-      return [];
-    }
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (_error) {
-    return [];
-  }
-}
-
-function writeLocalSessions(sessions) {
-  localStorage.setItem(localStorageKey, JSON.stringify(sessions));
-}
-
-function updateLocalSessionById(sessionId, updater) {
-  const sessions = readLocalSessions();
-  const next = sessions.map((candidate) => {
-    if (candidate.id !== sessionId) {
-      return candidate;
-    }
-    return updater(candidate);
-  });
-  writeLocalSessions(next);
-}
-
-function createClientId() {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
-}
-
-async function detectMode() {
-  try {
-    const response = await fetch("/api/health", { cache: "no-store" });
-    state.mode = response.ok ? "api" : "local";
-  } catch (_error) {
-    state.mode = "local";
-  }
-}
-
 function getModeLabel() {
-  return state.mode === "api" ? "Server mode" : "GitHub Pages mode";
+  return "Local server mode";
 }
 
 function scoreBoardClient(chess, perspective) {
@@ -461,69 +415,40 @@ async function createSession() {
     return;
   }
 
-  if (state.mode === "api") {
-    const response = await fetch("/api/sessions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, side })
-    });
+  const response = await fetch("/api/sessions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, side })
+  });
 
-    const payload = await response.json();
-    if (!response.ok) {
-      sessionStatus.textContent = payload.error || "Unable to create session.";
-      return;
-    }
-
-    hydrateSession(payload);
-    resultBox.textContent = "Recommendation will appear here.";
-    resultBox.className = "result";
+  const payload = await response.json();
+  if (!response.ok) {
+    sessionStatus.textContent = payload.error || "Unable to create session.";
     return;
   }
 
-  const sessions = readLocalSessions();
-  const localSession = {
-    id: createClientId(),
-    name,
-    side: side === "black" ? "b" : "w",
-    screenshotPath: null,
-    createdAt: new Date().toISOString(),
-    lastFen: null,
-    lastRecommendation: null
-  };
-
-  sessions.push(localSession);
-  writeLocalSessions(sessions);
-  hydrateSession(localSession);
+  hydrateSession(payload);
   resultBox.textContent = "Recommendation will appear here.";
   resultBox.className = "result";
 }
 
 async function fetchSessions() {
-  if (state.mode === "api") {
-    const response = await fetch("/api/sessions");
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(payload.error || "Unable to load sessions.");
-    }
-    return payload;
+  const response = await fetch("/api/sessions");
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error || "Unable to load sessions.");
   }
-  return readLocalSessions();
+  return payload;
 }
 
 async function deleteSession(sessionId) {
-  if (state.mode === "api") {
-    const response = await fetch(`/api/sessions/${sessionId}`, {
-      method: "DELETE"
-    });
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(payload.error || "Unable to remove game.");
-    }
-    return;
+  const response = await fetch(`/api/sessions/${sessionId}`, {
+    method: "DELETE"
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error || "Unable to remove game.");
   }
-
-  const next = readLocalSessions().filter((session) => session.id !== sessionId);
-  writeLocalSessions(next);
 }
 
 function readFileAsDataUrl(file) {
@@ -544,38 +469,25 @@ async function uploadScreenshot(file) {
 
   uploadStatus.textContent = "Uploading screenshot...";
 
-  if (state.mode === "api") {
-    const formData = new FormData();
-    formData.append("screenshot", file);
+  const formData = new FormData();
+  formData.append("screenshot", file);
 
-    const response = await fetch(`/api/sessions/${state.sessionId}/screenshot`, {
-      method: "POST",
-      body: formData
-    });
+  const response = await fetch(`/api/sessions/${state.sessionId}/screenshot`, {
+    method: "POST",
+    body: formData
+  });
 
-    const payload = await response.json();
-    if (!response.ok) {
-      uploadStatus.textContent = payload.error || "Upload failed.";
-      return;
-    }
-
-    uploadStatus.textContent = "Screenshot uploaded. Use the board mapper to mirror your position.";
-    if (payload.screenshotPath) {
-      screenshotPreview.src = payload.screenshotPath;
-      screenshotPreview.style.display = "block";
-    }
+  const payload = await response.json();
+  if (!response.ok) {
+    uploadStatus.textContent = payload.error || "Upload failed.";
     return;
   }
 
-  const dataUrl = await readFileAsDataUrl(file);
-  updateLocalSessionById(state.sessionId, (session) => ({
-    ...session,
-    screenshotPath: dataUrl
-  }));
-
-  screenshotPreview.src = dataUrl;
-  screenshotPreview.style.display = "block";
-  uploadStatus.textContent = "Screenshot saved to browser storage for this game.";
+  uploadStatus.textContent = "Screenshot uploaded. Use the board mapper to mirror your position.";
+  if (payload.screenshotPath) {
+    screenshotPreview.src = payload.screenshotPath;
+    screenshotPreview.style.display = "block";
+  }
 }
 
 async function analyzePosition() {
@@ -587,46 +499,22 @@ async function analyzePosition() {
 
   const fen = getFen();
 
-  if (state.mode === "api") {
-    const response = await fetch(`/api/sessions/${state.sessionId}/analyze`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fen, depth: 3 })
-    });
+  const response = await fetch(`/api/sessions/${state.sessionId}/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fen, depth: 3 })
+  });
 
-    const payload = await response.json();
-    if (!response.ok) {
-      resultBox.textContent = payload.error || "Analysis failed.";
-      resultBox.className = "result bad";
-      return;
-    }
-
-    const rec = payload.recommendation;
-    resultBox.textContent = `Best move: ${rec.san} (${rec.from} to ${rec.to}) | Eval: ${rec.score}`;
-    resultBox.className = "result good";
+  const payload = await response.json();
+  if (!response.ok) {
+    resultBox.textContent = payload.error || "Analysis failed.";
+    resultBox.className = "result bad";
     return;
   }
 
-  try {
-    const recommendation = findBestMoveClient(fen, 3);
-    if (!recommendation) {
-      resultBox.textContent = "No legal moves available in this position.";
-      resultBox.className = "result bad";
-      return;
-    }
-
-    updateLocalSessionById(state.sessionId, (session) => ({
-      ...session,
-      lastFen: fen,
-      lastRecommendation: recommendation
-    }));
-
-    resultBox.textContent = `Best move: ${recommendation.san} (${recommendation.from} to ${recommendation.to}) | Eval: ${recommendation.score}`;
-    resultBox.className = "result good";
-  } catch (error) {
-    resultBox.textContent = error.message || "Analysis failed.";
-    resultBox.className = "result bad";
-  }
+  const rec = payload.recommendation;
+  resultBox.textContent = `Best move: ${rec.san} (${rec.from} to ${rec.to}) | Eval: ${rec.score}`;
+  resultBox.className = "result good";
 }
 
 async function renderGamesList() {
@@ -796,7 +684,6 @@ async function init() {
   renderPalette();
   renderBoard();
   showView("menu");
-  await detectMode();
   sessionStatus.textContent = `No active session. ${getModeLabel()}.`;
 }
 
