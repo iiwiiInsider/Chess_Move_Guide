@@ -14,6 +14,15 @@ const pieceSymbols = {
   "": "·"
 };
 
+const pieceNames = {
+  K: "King",
+  Q: "Queen",
+  R: "Rook",
+  B: "Bishop",
+  N: "Knight",
+  P: "Pawn"
+};
+
 const paletteOrder = ["", "K", "Q", "R", "B", "N", "P", "k", "q", "r", "b", "n", "p"];
 const localStorageKey = "cmg_sessions_v1";
 
@@ -122,14 +131,48 @@ function getFen() {
   return `${boardPart} ${state.side} - - 0 1`;
 }
 
+function getPieceSide(piece) {
+  if (!piece) {
+    return null;
+  }
+  return piece === piece.toUpperCase() ? "white" : "black";
+}
+
+function getPieceTitle(piece) {
+  if (!piece) {
+    return "Clear square";
+  }
+
+  const side = getPieceSide(piece);
+  const name = pieceNames[piece.toUpperCase()] || "Piece";
+  return `${side === "white" ? "White" : "Black"} ${name}`;
+}
+
 function renderPalette() {
   piecePalette.innerHTML = "";
 
   for (const piece of paletteOrder) {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = pieceSymbols[piece];
-    button.title = piece || "Clear square";
+    button.title = getPieceTitle(piece);
+    button.className = "palette-piece";
+
+    const side = getPieceSide(piece);
+    if (side) {
+      button.classList.add(`side-${side}`);
+    }
+
+    const symbol = document.createElement("span");
+    symbol.className = `palette-piece-symbol ${side ? `piece-${side}` : ""}`;
+    symbol.textContent = pieceSymbols[piece];
+
+    const sideLabel = document.createElement("span");
+    sideLabel.className = "palette-piece-side";
+    sideLabel.textContent = piece ? (side === "white" ? "W" : "B") : "CLR";
+
+    button.appendChild(symbol);
+    button.appendChild(sideLabel);
+
     if (state.selectedPiece === piece) {
       button.classList.add("active");
     }
@@ -156,7 +199,23 @@ function renderBoard() {
       const square = document.createElement("button");
       square.type = "button";
       square.className = `square ${(row + col) % 2 === 0 ? "light" : "dark"}`;
-      square.textContent = piece ? pieceSymbols[piece] : "";
+
+      if (piece) {
+        const side = getPieceSide(piece);
+        const pieceEl = document.createElement("span");
+        pieceEl.className = `piece piece-${side}`;
+        pieceEl.textContent = pieceSymbols[piece];
+
+        const sideBadge = document.createElement("span");
+        sideBadge.className = `piece-side-badge side-${side}`;
+        sideBadge.textContent = side === "white" ? "W" : "B";
+
+        square.title = getPieceTitle(piece);
+        square.appendChild(pieceEl);
+        square.appendChild(sideBadge);
+      } else {
+        square.title = "Empty square";
+      }
 
       square.addEventListener("click", () => {
         state.board[row][col] = state.selectedPiece;
