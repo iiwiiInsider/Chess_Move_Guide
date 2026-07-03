@@ -11,10 +11,19 @@ A lightweight web app where you can:
 
 This repository is configured to deploy automatically to GitHub Pages using GitHub Actions.
 
-1. Push your code to the main branch.
-2. In your repository settings, open Pages and ensure Source is set to GitHub Actions.
-3. Wait for the Deploy to GitHub Pages workflow to complete.
-4. Your live URL will appear in the workflow summary and Pages settings.
+1. Commit your changes locally.
+2. Push to the main branch.
+3. In repository Settings > Pages, ensure Source is set to GitHub Actions.
+4. Wait for the Deploy to GitHub Pages workflow to complete.
+5. Open your site at: `https://iiwiiinsider.github.io/Chess_Move_Guide/`
+
+Quick publish commands:
+
+```bash
+git add .
+git commit -m "Update labels and deploy-ready frontend"
+git push origin main
+```
 
 ### GitHub Pages Runtime Mode
 
