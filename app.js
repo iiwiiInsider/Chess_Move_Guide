@@ -168,7 +168,7 @@ function renderPalette() {
 
     const sideLabel = document.createElement("span");
     sideLabel.className = "palette-piece-side";
-    sideLabel.textContent = piece ? (side === "white" ? "W" : "B") : "CLR";
+    sideLabel.textContent = piece ? (side === "white" ? "WHITE" : "BLACK") : "CLEAR";
 
     button.appendChild(symbol);
     button.appendChild(sideLabel);
@@ -208,7 +208,7 @@ function renderBoard() {
 
         const sideBadge = document.createElement("span");
         sideBadge.className = `piece-side-badge side-${side}`;
-        sideBadge.textContent = side === "white" ? "W" : "B";
+        sideBadge.textContent = side === "white" ? "WHITE" : "BLACK";
 
         square.title = getPieceTitle(piece);
         square.appendChild(pieceEl);

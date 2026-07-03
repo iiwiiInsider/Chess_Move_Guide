@@ -301,11 +301,11 @@ hr {
 }
 
 .palette-piece-side {
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
   font-weight: 700;
   border-radius: 999px;
-  padding: 1px 7px;
+  padding: 2px 6px;
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.08);
 }
@@ -374,12 +374,13 @@ hr {
   position: absolute;
   top: 3px;
   right: 3px;
-  min-width: 18px;
-  padding: 1px 5px;
+  min-width: 38px;
+  text-align: center;
+  padding: 1px 4px;
   border-radius: 999px;
-  font-size: 0.6rem;
+  font-size: 0.5rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   border: 1px solid rgba(255, 255, 255, 0.28);
 }
 
