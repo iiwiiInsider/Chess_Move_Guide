@@ -3,6 +3,7 @@ const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const rateLimit = require("express-rate-limit");
 const { v4: uuidv4 } = require("uuid");
 const { Chess } = require("chess.js");
 
@@ -20,7 +21,13 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 if (!fs.existsSync(sessionsFile)) {
-  fs.writeFileSync(sessionsFile, JSON.stringify({ sessions: [] }, null, 2), "utf-8");
+  try {
+    fs.writeFileSync(sessionsFile, JSON.stringify({ sessions: [] }, null, 2), { encoding: "utf-8", flag: "wx" });
+  } catch (error) {
+    if (error.code !== "EEXIST") {
+      throw error;
+    }
+  }
 }
 
 const storage = multer.diskStorage({
@@ -45,6 +52,15 @@ const upload = multer({
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+app.use(
+  "/api",
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 app.use("/uploads", express.static(uploadsDir));
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -238,10 +254,10 @@ app.delete("/api/sessions/:id", (req, res) => {
   if (deleted?.screenshotPath) {
     const screenshotName = path.basename(deleted.screenshotPath);
     const absoluteScreenshotPath = path.join(uploadsDir, screenshotName);
-    if (fs.existsSync(absoluteScreenshotPath)) {
-      try {
-        fs.unlinkSync(absoluteScreenshotPath);
-      } catch (_error) {
+    try {
+      fs.unlinkSync(absoluteScreenshotPath);
+    } catch (error) {
+      if (error.code !== "ENOENT") {
         // A failed file delete should not block deleting the game session.
       }
     }
