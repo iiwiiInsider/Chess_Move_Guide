@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -9,6 +10,7 @@ const { Chess } = require("chess.js");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(",").map(o => o.trim());
 
 const dataDir = path.join(__dirname, "data");
 const uploadsDir = path.join(__dirname, "uploads");
@@ -50,7 +52,13 @@ const upload = multer({
   }
 });
 
-app.use(cors());
+app.use(helmet());
+app.use(cors({
+  origin: ALLOWED_ORIGINS,
+  credentials: true,
+  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type']
+}));
 app.use(express.json({ limit: "1mb" }));
 app.use(
   "/api",

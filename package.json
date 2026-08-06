@@ -22,9 +22,10 @@
   "dependencies": {
     "chess.js": "^1.4.0",
     "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.1.0",
-    "multer": "^2.2.0",
-    "uuid": "^14.0.1"
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^8.1.0",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.1"
   }
 }
